@@ -10,7 +10,7 @@ public class WebServer {
     private int port;
 
     public WebServer(int portKey) {
-        this.port = port;
+        this.port = portKey;
     }
 
     public void start() throws Exception {

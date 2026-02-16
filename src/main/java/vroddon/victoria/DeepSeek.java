@@ -26,7 +26,7 @@ public class DeepSeek {
     public static void main(String[] args) throws Exception {
         DeepSeek ds = new DeepSeek();
         String curso ="";
-        String text = DeepSeek.chat("Eres un conversador simpá tico.", "¿Qué tal estás?");
+        String text = DeepSeek.chat("Eres un conversador simpático.", "¿Qué tal estás?");
         System.out.println(text);        
     }    
     public static String chat(String tarea, String pregunta)
