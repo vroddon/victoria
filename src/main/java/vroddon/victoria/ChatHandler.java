@@ -13,13 +13,12 @@ public class ChatHandler extends HttpServlet {
     private static String apiKey = null;
     private static String LLM = "https://api.openai.com/v1/chat/completions";
 
-    DeepSeek chino = new DeepSeek();
+    DeepSeekSession chino = new DeepSeekSession("You are a friendly conversationalist.");
 
     public ChatHandler() {
     }
 
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         StringBuilder sb = new StringBuilder();
         BufferedReader reader = req.getReader();
@@ -40,7 +39,16 @@ public class ChatHandler extends HttpServlet {
     }
 
     private String getAnswer(String question) {
-        return DeepSeek.chat("You are a nice chat", quote(question));
+        String res = "Leave me alone.";
+        try{
+            res= chino.chat(question);
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        return res;
+
+//        return DeepSeek.chat("You are a nice chat", question);
     }
 
     private String quote(String s) {
