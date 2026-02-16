@@ -26,7 +26,7 @@ public class DeepSeek {
     public static void main(String[] args) throws Exception {
         DeepSeek ds = new DeepSeek();
         String curso ="";
-        String text = DeepSeek.chat("Eres un conversador simp�tico.", "�Qu� tal est�s?");
+        String text = DeepSeek.chat("Eres un conversador simpá tico.", "¿Qué tal estás?");
         System.out.println(text);        
     }    
     public static String chat(String tarea, String pregunta)
@@ -86,7 +86,7 @@ public class DeepSeek {
         System.out.println(base64Image.length());
         
 
-        // 2. Construir JSON de la petición
+        // 2. Construir JSON de la peticiÃ³n
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode root = mapper.createObjectNode();
         MODEL = "deepseek-vl";
@@ -120,7 +120,7 @@ public class DeepSeek {
 
         root.set("messages", messages);
 
-        // 3. Enviar petición HTTP
+        // 3. Enviar peticiÃ³n HTTP
         URL url = new URL(LLM_URL); //API_URL
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
