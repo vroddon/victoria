@@ -17,8 +17,11 @@ public class WebServer {
 
         Server server = new Server(port);
 
-        ServletContextHandler handler = new ServletContextHandler();
-        handler.setContextPath("/");
+        ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        handler.setContextPath("/victoria");        
+        
+//vvv        ServletContextHandler handler = new ServletContextHandler();
+//vvv        handler.setContextPath("/");
 
         // Serve static files from src/main/resources/web/
         handler.setResourceBase(
