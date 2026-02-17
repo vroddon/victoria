@@ -43,7 +43,7 @@
     {
         append("<b>You:</b> " + msg);
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/chat", true);
+        xhr.open("POST", "chat", true);
         xhr.onload = function() {
             append("<b>AI:</b> " + xhr.responseText);
         };
