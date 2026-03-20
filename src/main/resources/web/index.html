@@ -1,61 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>victoria</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        #chatbox { width: 100%; height: 300px; border: 1px solid #ccc;
-                   padding: 10px; overflow-y: scroll; }
-        #input { width: 80%; }
-        #sendBtn { width: 80px; }
-    </style>
+<meta charset="UTF-8">
+<title>Chat</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 40px auto;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+}
+
+#chat {
+  flex: 1;
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.msg {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  white-space: pre-wrap;
+}
+
+.user {
+  align-self: flex-end;
+  background: #007bff;
+  color: white;
+}
+
+.bot {
+  align-self: flex-start;
+  background: #eee;
+}
+
+#inputArea {
+  display: flex;
+  margin-top: 10px;
+}
+
+#input {
+  flex: 1;
+  padding: 8px;
+}
+
+button {
+  padding: 8px 12px;
+}
+
+/* typing animation */
+.typing::after {
+  content: '...';
+  animation: dots 1s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+}
+</style>
 </head>
 <body>
 
+<div id="chat"></div>
 
-<h2 style="display:inline-flex; align-items:center; gap:8px; margin:0;">
-  <img src="icon.png" alt="" aria-hidden="true" style="height:24px; object-fit:cover; flex:0 0 auto;">
-  Victoria
-</h2>
-
-
-<div id="chatbox"></div><br>
-
-<input type="text" id="input" placeholder="Type your message…" />
-<button id="sendBtn">Send</button>
+<div id="inputArea">
+  <input id="input" placeholder="Escribe..." />
+  <button onclick="send()">Enviar</button>
+</div>
 
 <script>
-    document.getElementById('input').addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            send(document.getElementById("input").value);
-            document.getElementById("input").value = "";
-        }
-    })  
-  
-    function append(text) {
-        var box = document.getElementById("chatbox");
-        box.innerHTML += text + "<br>";
-        box.scrollTop = box.scrollHeight;
-    }
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
 
-    function send(msg)
-    {
-        append("<b>You:</b> " + msg);
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "chat", true);
-        xhr.onload = function() {
-            append("<b>AI:</b> " + xhr.responseText);
-        };
-        xhr.send(msg);
-      
-    }
+// ENTER
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') send();
+});
 
-    document.getElementById("sendBtn").onclick = function() {
-        var msg = document.getElementById("input").value;
-        if (!msg) return;
-        document.getElementById("input").value = "";
-    };
+// Persistencia
+function saveHistory() {
+  localStorage.setItem('chatHistory', chat.innerHTML);
+}
+
+function loadHistory() {
+  const saved = localStorage.getItem('chatHistory');
+  if (saved) {
+    chat.innerHTML = saved;
+    chat.scrollTop = chat.scrollHeight;
+  }
+}
+
+loadHistory();
+
+// Crear mensaje
+function addMessage(text, cls) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + cls;
+  div.textContent = text;
+  chat.appendChild(div);
+  scrollDown();
+  saveHistory();
+  return div;
+}
+
+function scrollDown() {
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// Simular streaming (token a token)
+function streamText(element, text, speed = 20) {
+  element.textContent = '';
+  let i = 0;
+  const interval = setInterval(() => {
+    element.textContent += text[i];
+    i++;
+    scrollDown();
+    if (i >= text.length) {
+      clearInterval(interval);
+      saveHistory();
+    }
+  }, speed);
+}
+
+async function send() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, 'user');
+  input.value = '';
+
+  const botMsg = addMessage('', 'bot typing');
+
+  try {
+    const res = await fetch('/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text })
+    });
+
+    const data = await res.json();
+
+    botMsg.classList.remove('typing');
+    streamText(botMsg, data.reply);
+
+  } catch (e) {
+    botMsg.classList.remove('typing');
+    botMsg.textContent = 'Error conectando con el servidor';
+  }
+}
 </script>
 
 </body>

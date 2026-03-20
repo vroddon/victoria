@@ -1,57 +1,45 @@
 package vroddon.victoria;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 public class ChatHandler extends HttpServlet {
 
-    private static String apiKey = null;
-    private static String LLM = "https://api.openai.com/v1/chat/completions";
+    DeepSeekSession deepseek = new DeepSeekSession("Eres un conversador simpático.");
+    
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
-    DeepSeekSession chino = new DeepSeekSession("You are a friendly conversationalist.");
-
-    public ChatHandler() {
-    }
-
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        // Leer body
         StringBuilder sb = new StringBuilder();
         BufferedReader reader = req.getReader();
-
-        String line = reader.readLine();
-        while (line != null) {
+        String line;
+        while ((line = reader.readLine()) != null) {
             sb.append(line);
-            line = reader.readLine();
         }
-        String question = sb.toString();
+        String body = sb.toString();
 
-        String json = getAnswer(question);
+        // Extraer el mensaje (ultra simple, sin librerías JSON)
+        String message = "";
+        int start = body.indexOf("\"message\":\"");
+        if (start != -1) {
+            start += 11;
+            int end = body.indexOf("\"", start);
+            if (end != -1) {
+                message = body.substring(start, end);
+            }
+        }
 
+        // Respuesta eco
+//        String reply = "Echo: " + message;
+        String reply = deepseek.chat(message);
+
+        // Devolver JSON
         resp.setContentType("application/json");
-        PrintWriter out = resp.getWriter();
-        out.print(json);
-        out.flush();
-    }
-
-    private String getAnswer(String question) {
-        String res = "Leave me alone.";
-        try{
-            res= chino.chat(question);
-        }catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-        return res;
-
-//        return DeepSeek.chat("You are a nice chat", question);
-    }
-
-    private String quote(String s) {
-        return "\"" + s.replace("\"", "\\\"") + "\"";
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().write("{\"reply\":\"" + reply + "\"}");
     }
 }

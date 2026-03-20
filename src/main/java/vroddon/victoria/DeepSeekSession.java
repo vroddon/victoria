@@ -64,7 +64,8 @@ public class DeepSeekSession {
     /**
      * Send a user message, get assistant reply, and keep both in history.
      */
-    public String chat(String userMessage) throws Exception {
+    public String chat(String userMessage)  {
+        
         if (userMessage == null) userMessage = "";
         this.history.add(new Message("user", userMessage));
 
@@ -83,13 +84,16 @@ public class DeepSeekSession {
         root.set("messages", msgs);
         root.put("stream", false);
 
+        String assistant = "";
+        try{
         String responseBody = postJson(LLM_URL, root.toString());
-
         JsonNode rootNode = mapper.readTree(responseBody);
         JsonNode choicesNode = rootNode.path("choices");
-        String assistant = "";
         if (choicesNode.isArray() && choicesNode.size() > 0) {
             assistant = choicesNode.get(0).path("message").path("content").asText();
+        }}catch(Exception e)
+        {
+            assistant = "Mira, no lo sé.";
         }
 
         // Append assistant message to history
@@ -211,8 +215,7 @@ public class DeepSeekSession {
     // ---- Demo main ----
     public static void main(String[] args) throws Exception {
         DeepSeekSession session = new DeepSeekSession("Eres un conversador simpático.");
-        System.out.println(session.chat("¿Qué tal estás?"));
-        System.out.println(session.chat("Recuérdame cómo te describí al inicio."));
-        System.out.println(session.chat("Ahora háblame en inglés."));
+        System.out.println(session.chat("Hola, me llamo Víctor"));
+        System.out.println(session.chat("¿Cómo me llamo?"));
     }
 }
